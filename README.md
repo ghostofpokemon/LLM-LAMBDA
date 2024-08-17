@@ -1,7 +1,7 @@
 # llm-lambda
 
 [![PyPI](https://img.shields.io/pypi/v/llm-lambda.svg)](https://pypi.org/project/llm-lambda/)
-[!GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ghostofpokemon/llm-lambda?include_prereleases)
+[![GitHub release (latest by date including pre-releases)]](https://img.shields.io/github/v/release/ghostofpokemon/llm-lambda?include_prereleases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/ghostofpokemon/llm-lambda/blob/main/LICENSE)
 
 LLM access to Hermes3 models by lambda Labs
