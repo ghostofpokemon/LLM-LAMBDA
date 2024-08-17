@@ -2,6 +2,7 @@
 name = "llm-lambda"
 version = "0.1"
 description = "LLM access to LAMBDA's API"
+readme = "README.md"
 license = { text = "Apache-2.0" }
 classifiers = [
     "License :: OSI Approved :: Apache Software License"

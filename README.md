@@ -4,7 +4,7 @@
 [![Changelog](https://img.shields.io/github/v/release/ghostofpokemon/llm-lambda?include_prereleases&label=changelog)](https://github.com/ghostofpokemon/llm-lambda/releases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/ghostofpokemon/llm-lambda/blob/main/LICENSE)
 
-LLM access to pplx-api 3 by lambda Labs
+LLM access to Hermes3 models by lambda Labs
 
 ## Installation
 
