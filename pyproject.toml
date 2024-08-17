@@ -17,7 +17,7 @@ authors = [
 
 [project.urls]
 Homepage = "https://github.com/ghostofpokemon/llm-lambda"
-Changelog = "https://github.com/ghostofpokemon/llm-lambda/releases"
+Changelog = "https://github.com/ghostofpokemon/llm-lambda/blob/main/CHANGELOG.md"
 Issues = "https://github.com/ghostofpokemon/llm-lambda/issues"
 CI = "https://github.com/ghostofpokemon/llm-lambda/actions"
 
