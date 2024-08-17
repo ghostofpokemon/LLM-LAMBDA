@@ -1,0 +1,24 @@
+[project]
+name = "llm-lambda"
+version = "0.1"
+description = "LLM access to LAMBDA's api"
+license = { text = "Apache-2.0" }
+classifiers = [
+    "License :: OSI Approved :: Apache Software License"
+]
+dependencies = [
+    "llm",
+    "OpenAI",
+]
+authors = [
+    { name = "Nick Mystic" }
+]
+
+[project.urls]
+Homepage = "https://github.com/ghostofpokemon/llm-perplexity"
+Changelog = "https://github.com/ghostofpokemon/llm-perplexity/releases"
+Issues = "https://github.com/ghostofpokemon/llm-perplexity/issues"
+CI = "https://github.com/ghostofpokemon/llm-perplexity/actions"
+
+[project.entry-points.llm]
+llm_lambda = "llm_lambda"
