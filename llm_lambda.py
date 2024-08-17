@@ -42,6 +42,49 @@ class LambdaCompletion(Completion):
     def __str__(self):
         return f"Lambda Completion: {self.model_id}"
 
+    def execute(self, prompt, stream, response, conversation=None):
+        messages = []
+        if conversation is not None:
+            for prev_response in conversation.responses:
+                messages.append(prev_response.prompt.prompt)
+                messages.append(prev_response.text())
+        messages.append(prompt.prompt)
+        response._prompt_json = {"messages": messages}
+        kwargs = self.build_kwargs(prompt)
+        client = self.get_client()
+        try:
+            if stream:
+                completion = client.completions.create(
+                    model=self.model_name or self.model_id,
+                    prompt="\n".join(messages),
+                    stream=True,
+                    **kwargs,
+                )
+                for chunk in completion:
+                    if chunk.choices and chunk.choices[0].text is not None:
+                        yield chunk.choices[0].text
+                response.response_json = self.combine_chunks(completion)
+            else:
+                completion = client.completions.create(
+                    model=self.model_name or self.model_id,
+                    prompt="\n".join(messages),
+                    stream=False,
+                    **kwargs,
+                )
+                response.response_json = completion.model_dump()
+                yield completion.choices[0].text
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            raise
+
+    @staticmethod
+    def combine_chunks(chunks):
+        content = ""
+        for chunk in chunks:
+            if chunk.choices and chunk.choices[0].text is not None:
+                content += chunk.choices[0].text
+        return {"content": content}
+
 @llm.hookimpl
 def register_models(register):
     key = llm.get_key("", "lambda", "LLM_LAMBDA_KEY")
