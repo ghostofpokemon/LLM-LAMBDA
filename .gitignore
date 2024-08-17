@@ -1,0 +1,17 @@
+# Python egg metadata, regenerated from source files by setuptools.
+*.egg-info
+*.egg
+
+# Build directories
+build/
+dist/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+*.venv
+env/
