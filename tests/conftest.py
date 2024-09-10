@@ -7,12 +7,12 @@ DUMMY_MODELS = {
         {
             "id": "hermes-3-llama-3.1-405b-fp8",
             "name": "Hermes 3 Llama 3.1 405B FP8",
-            "context_length": 4096,
+            "context_length": 18000,
         },
         {
             "id": "hermes-3-llama-3.1-405b-fp8-128k",
             "name": "Hermes 3 Llama 3.1 405B FP8 128K",
-            "context_length": 131072,
+            "context_length": 128000,
         },
     ]
 }

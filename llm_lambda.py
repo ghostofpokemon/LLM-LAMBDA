@@ -49,6 +49,12 @@ class LambdaCompletion(Completion):
                 messages.append(prev_response.prompt.prompt)
                 messages.append(prev_response.text())
         messages.append(prompt.prompt)
+
+        # Include system message if provided
+        if prompt.system:
+            messages.insert(0, prompt.system)
+
+        full_prompt = "\n".join(messages)
         response._prompt_json = {"messages": messages}
         kwargs = self.build_kwargs(prompt)
         client = self.get_client()
@@ -56,7 +62,7 @@ class LambdaCompletion(Completion):
             if stream:
                 completion = client.completions.create(
                     model=self.model_name or self.model_id,
-                    prompt="\n".join(messages),
+                    prompt=full_prompt,
                     stream=True,
                     **kwargs,
                 )
@@ -67,7 +73,7 @@ class LambdaCompletion(Completion):
             else:
                 completion = client.completions.create(
                     model=self.model_name or self.model_id,
-                    prompt="\n".join(messages),
+                    prompt=full_prompt,
                     stream=False,
                     **kwargs,
                 )

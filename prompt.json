@@ -1,5 +1,0 @@
-{
-  "model": "hermes-3-llama-3.1-405b-fp8",
-  "prompt": "Who am I?",
-  "temperature": 0
-}
