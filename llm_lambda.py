@@ -1,9 +1,9 @@
+import time
+import httpx
 import llm
 from llm.default_plugins.openai_models import Chat, Completion
 from pathlib import Path
 import json
-import time
-import httpx
 
 def get_lambda_models(key):
     headers = {"Authorization": f"Bearer {key}"}
@@ -35,6 +35,51 @@ class LambdaChat(Chat):
     def __str__(self):
         return f"Lambda Chat: {self.model_id}"
 
+    def execute(self, prompt, stream, response, conversation=None):
+        messages = []
+        if conversation is not None:
+            for prev_response in conversation.responses:
+                messages.append({"role": "user", "content": prev_response.prompt.prompt})
+                messages.append({"role": "assistant", "content": prev_response.text()})
+
+        # Include system message if provided
+        if prompt.system:
+            messages.insert(0, {"role": "system", "content": prompt.system})
+
+        messages.append({"role": "user", "content": prompt.prompt})
+        response._prompt_json = {"messages": messages}
+        kwargs = self.build_kwargs(prompt)
+        client = self.get_client()
+
+        retries = 3
+        delay = 5  # seconds
+
+        for attempt in range(retries):
+            try:
+                completion = client.chat.completions.create(
+                    model=self.model_name or self.model_id,
+                    messages=messages,
+                    stream=stream,
+                    **kwargs,
+                )
+
+                for chunk in completion:
+                    content = chunk.choices[0].delta.content
+                    if content is not None:
+                        yield content
+
+                response.response_json = {"content": "".join(response._chunks)}
+                break  # Exit the retry loop if successful
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 401:
+                    print(f"Authentication error (401). Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    raise  # Re-raise the exception if it's not a 401 error
+            except Exception as e:
+                print(f"An error occurred: {str(e)}")
+                raise
+
 class LambdaCompletion(Completion):
     needs_key = "lambda"
     key_env_var = "LLM_LAMBDA_KEY"
@@ -58,30 +103,42 @@ class LambdaCompletion(Completion):
         response._prompt_json = {"messages": messages}
         kwargs = self.build_kwargs(prompt)
         client = self.get_client()
-        try:
-            if stream:
-                completion = client.completions.create(
-                    model=self.model_name or self.model_id,
-                    prompt=full_prompt,
-                    stream=True,
-                    **kwargs,
-                )
-                for chunk in completion:
-                    if chunk.choices and chunk.choices[0].text is not None:
-                        yield chunk.choices[0].text
-                response.response_json = self.combine_chunks(completion)
-            else:
-                completion = client.completions.create(
-                    model=self.model_name or self.model_id,
-                    prompt=full_prompt,
-                    stream=False,
-                    **kwargs,
-                )
-                response.response_json = completion.model_dump()
-                yield completion.choices[0].text
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            raise
+
+        retries = 3
+        delay = 5  # seconds
+
+        for attempt in range(retries):
+            try:
+                if stream:
+                    completion = client.completions.create(
+                        model=self.model_name or self.model_id,
+                        prompt=full_prompt,
+                        stream=True,
+                        **kwargs,
+                    )
+                    for chunk in completion:
+                        if chunk.choices and chunk.choices[0].text is not None:
+                            yield chunk.choices[0].text
+                    response.response_json = self.combine_chunks(completion)
+                else:
+                    completion = client.completions.create(
+                        model=self.model_name or self.model_id,
+                        prompt=full_prompt,
+                        stream=False,
+                        **kwargs,
+                    )
+                    response.response_json = completion.model_dump()
+                    yield completion.choices[0].text
+                break  # Exit the retry loop if successful
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 401:
+                    print(f"Authentication error (401). Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    raise  # Re-raise the exception if it's not a 401 error
+            except Exception as e:
+                print(f"An error occurred: {str(e)}")
+                raise
 
     @staticmethod
     def combine_chunks(chunks):
